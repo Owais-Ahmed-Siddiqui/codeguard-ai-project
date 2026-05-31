@@ -1,0 +1,390 @@
+════════════════════════════════════════════════════════════════════
+                    🛡️  CODEGUARD AI — PROJECT REPORT
+════════════════════════════════════════════════════════════════════
+  Author      : Owais Ahmed
+  Roll No     : 2467-2024
+  Project     : CodeGuard AI — AI-Powered Code Review & Security Analysis
+  Type        : Full-Stack Web Application
+  Date        : 31-5-2026
+════════════════════════════════════════════════════════════════════
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. PROJECT OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CodeGuard AI is a full-stack web application that provides AI-powered
+code reviews. Users paste code in any of 15+ programming languages,
+and the AI (Google Gemini 3 Flash Preview) analyzes it for:
+
+  • Bugs & Logic Errors
+  • Security Vulnerabilities (OWASP Top 10)
+  • Performance Bottlenecks
+  • Architecture & Design Flaws
+
+The AI acts as a "Lead Software Architect and Security Engineer" and
+returns structured Markdown with:
+  ## 🚩 Issues Found
+  ## 🛡️ Security Risks
+  ## ✅ Optimized Solution
+  ## 💡 Architecture Tips
+
+Users can then chat with the AI for follow-up questions, all within
+a ChatGPT-style interface.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  2. TECH STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  LAYER        TECHNOLOGY               VERSION
+  ─────────    ─────────────────────     ────────
+  Frontend     React.js                  19
+  Language     TypeScript                5.9
+  Build Tool   Vite                      7.x
+  Styling      Tailwind CSS              4.x
+  Animations   Framer Motion             11.x
+  Code Editor  Monaco Editor             4.x
+  Icons        Lucide React              latest
+  Markdown     react-markdown + remark   latest
+  
+  Backend      Node.js + Express         4.x
+  AI Engine    Google Gemini 3 Flash Preview     @google/generative-ai
+  
+  Database     Supabase (PostgreSQL)     2.x
+  Auth         Supabase Auth             built-in
+  RLS          Row Level Security        PostgreSQL native
+  
+  Deployment   Vercel (Frontend)         managed
+              Render (Backend)          managed
+              Supabase (Database)       managed
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  3. FEATURE LIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  #   FEATURE                   DESCRIPTION
+  ──  ─────────────────────     ──────────────────────────────────
+  1   AI Code Review           Gemini 3 Flash Preview analyzes code with
+                                security-engineer persona
+
+  2   Conversational Chat      ChatGPT-like follow-up interface
+                                with full code context
+
+  3   15+ Language Support      JS, Python, Java, C++, TypeScript,
+                                Rust, Go, C#, PHP, Ruby, etc.
+
+  4   Ghost Mode               Privacy toggle — code analyzed but
+                                never stored in database
+
+  5   Credit System            20 free reviews per user per day
+                                (server-side validated)
+
+  6   User Authentication      Supabase Auth (email/password)
+
+  7   Row Level Security        Users can only access their own data
+
+  8   Monaco Code Editor        Full VS Code-like editing experience
+
+  9   Markdown Rendering         AI responses rendered with tables,
+                                 code blocks, severity badges
+
+  10  Copy Code Button          One-click copy of optimized solutions
+
+  11  Sample Buggy Code         Pre-loaded vulnerable code for
+                                JS, Python, Java, C++
+
+  12  Dashboard                 Stats, review history, quick actions
+
+  13  ChatGPT-style Sidebar     Persistent sidebar with history,
+                                new review, user menu
+
+  14  Landing Page              High-conversion marketing page with
+                                animations, bento grid, pricing
+
+  15  Auto Profile Creation     Backend auto-creates user profiles
+                                on first API call
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  4. DATABASE SCHEMA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  TABLE: public.users
+  ┌─────────────────────┬───────────┬──────────────────────────────┐
+  │ Column              │ Type      │ Notes                        │
+  ├─────────────────────┼───────────┼──────────────────────────────┤
+  │ id                  │ UUID      │ PK → auth.users.id           │
+  │ username            │ TEXT      │ UNIQUE NOT NULL              │
+  │ email               │ TEXT      │ UNIQUE NOT NULL              │
+  │ daily_count         │ INTEGER   │ DEFAULT 0                    │
+  │ last_review_date    │ DATE      │ NULLABLE                     │
+  │ plan                │ TEXT      │ 'free' | 'pro' | 'enterprise'│
+  │ created_at          │ TIMESTAMPTZ│ DEFAULT NOW()               │
+  │ updated_at          │ TIMESTAMPTZ│ DEFAULT NOW()               │
+  └─────────────────────┴───────────┴──────────────────────────────┘
+
+  TABLE: public.reviews
+  ┌─────────────────────┬───────────┬──────────────────────────────┐
+  │ Column              │ Type      │ Notes                        │
+  ├─────────────────────┼───────────┼──────────────────────────────┤
+  │ id                  │ UUID      │ PK (auto-generated)          │
+  │ user_id             │ UUID      │ FK → users.id (CASCADE)      │
+  │ code                │ TEXT      │ NOT NULL                     │
+  │ language            │ TEXT      │ NOT NULL                     │
+  │ ai_feedback         │ JSONB     │ { response: "..." }         │
+  │ ghost_mode          │ BOOLEAN   │ DEFAULT FALSE                │
+  │ created_at          │ TIMESTAMPTZ│ DEFAULT NOW()               │
+  └─────────────────────┴───────────┴──────────────────────────────┘
+
+  TABLE: public.chats
+  ┌─────────────────────┬───────────┬──────────────────────────────┐
+  │ Column              │ Type      │ Notes                        │
+  ├─────────────────────┼───────────┼──────────────────────────────┤
+  │ id                  │ UUID      │ PK (auto-generated)          │
+  │ review_id           │ UUID      │ FK → reviews.id (CASCADE)    │
+  │ role                │ TEXT      │ 'user' | 'assistant'         │
+  │ content             │ TEXT      │ NOT NULL                     │
+  │ created_at          │ TIMESTAMPTZ│ DEFAULT NOW()               │
+  └─────────────────────┴───────────┴──────────────────────────────┘
+
+  TRIGGER: on_auth_user_created
+    AFTER INSERT ON auth.users
+    → INSERT INTO public.users (id, username, email)
+
+  RLS POLICIES:
+    users:   SELECT/UPDATE/INSERT where auth.uid() = id
+    reviews: SELECT/INSERT/DELETE where auth.uid() = user_id
+    chats:   SELECT/INSERT via review ownership
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  5. API ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  METHOD  ENDPOINT              AUTH     DESCRIPTION
+  ──────  ───────────────────   ──────   ──────────────────────────
+  GET     /api/health           No       Health check + service status
+  GET     /api/credits          Yes      Get remaining daily credits
+  POST    /api/review           Yes      Submit code for AI review
+  POST    /api/chat             Yes      Chat with AI about review
+  GET     /api/history          Yes      Get review history + stats
+  DELETE  /api/reviews/:id      Yes      Delete a specific review
+
+  Auth Header: Authorization: Bearer <supabase-access-token>
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  6. FILE STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  codeguard-ai/
+  │
+  ├── src/                              # FRONTEND (React)
+  │   ├── lib/
+  │   │   ├── supabase.ts              # Supabase client
+  │   │   └── api.ts                   # API service + types
+  │   │
+  │   ├── contexts/
+  │   │   └── AuthContext.tsx           # Auth state provider
+  │   │
+  │   ├── pages/
+  │   │   ├── LandingPage.tsx          # Marketing page
+  │   │   ├── AuthPage.tsx             # Sign in / Sign up
+  │   │   ├── Workspace.tsx            # ChatGPT-style layout
+  │   │   ├── DashboardPage.tsx        # Stats + history
+  │   │   └── EditorPage.tsx           # Monaco + AI review
+  │   │
+  │   ├── data/
+  │   │   └── sampleCodes.ts           # Buggy sample codes
+  │   │
+  │   ├── App.tsx                      # Routing + auth
+  │   ├── main.tsx                     # Entry point
+  │   ├── index.css                    # Tailwind + custom
+  │   └── vite-env.d.ts               # TS declarations
+  │
+  ├── server/                           # BACKEND (Express)
+  │   ├── index.js                     # All API routes
+  │   ├── package.json                 # Dependencies
+  │   └── .env.example                 # Env template
+  │
+  ├── SUPABASE_SCHEMA.sql              # Full DB schema
+  ├── .env.example                      # Frontend env template
+  ├── .gitignore
+  ├── SETUP.md                          # Setup guide
+  ├── README.md                         # Repository readme
+  ├── report.txt                        # This file
+  ├── package.json                      # Frontend deps
+  └── vite.config.ts                    # Vite config
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  7. ENVIRONMENT VARIABLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  FRONTEND (.env):
+  ┌────────────────────────────┬───────────────────────────────────┐
+  │ Variable                   │ Description                       │
+  ├────────────────────────────┼───────────────────────────────────┤
+  │ VITE_API_URL               │ Backend URL                       │
+  │ VITE_SUPABASE_URL          │ Supabase project URL              │
+  │ VITE_SUPABASE_ANON_KEY     │ Supabase anonymous key            │
+  └────────────────────────────┴───────────────────────────────────┘
+
+  BACKEND (server/.env):
+  ┌────────────────────────────┬───────────────────────────────────┐
+  │ Variable                   │ Description                       │
+  ├────────────────────────────┼───────────────────────────────────┤
+  │ PORT                       │ Server port (3001)                │
+  │ NODE_ENV                   │ 'development' | 'production'      │
+  │ FRONTEND_URL               │ Frontend URL for CORS             │
+  │ GEMINI_API_KEY             │ Google Gemini API key             │
+  │ SUPABASE_URL               │ Supabase project URL              │
+  │ SUPABASE_SERVICE_ROLE_KEY  │ Supabase service role key         │
+  └────────────────────────────┴───────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  8. CREDIT SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  MAX_CREDITS = 20 per user per day
+
+  Logic:
+    • Each user has: daily_count + last_review_date in users table
+    • On review request:
+      - If ghostMode = true → skip credit check, don't save to DB
+      - If ghostMode = false:
+          * Check if last_review_date = today
+          * If same day: check daily_count < 20
+          * If different day: reset count to 0
+    • After successful review: increment daily_count, update date
+    • Credits are per-user (isolated by user_id in database)
+
+  Ghost Mode:
+    • When ON: unlimited reviews, no DB save, no credit deduction
+    • When OFF: normal credit system applies
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  9. SECURITY MEASURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Supabase Row Level Security (RLS) on all tables
+  2. JWT token verification on every API request
+  3. User can only access their own reviews/chats
+  4. Service role key only on backend (never exposed to frontend)
+  5. CORS restricted to frontend URL only
+  6. Input validation on all endpoints
+  7. Code length limit (50,000 characters)
+  8. Ghost Mode for privacy-conscious users
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  10. DEPLOYMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  SERVICE     PLATFORM    DETAILS
+  ─────────   ─────────   ─────────────────────────────────────
+  Frontend    Vercel      Auto-deploys from GitHub main branch
+  Backend     Render      Auto-deploys from GitHub main branch
+  Database    Supabase    Managed PostgreSQL
+  Auth        Supabase    Email/password authentication
+  AI          Google      Gemini 3 Flash Preview API
+
+  Deployment URLs:
+    Frontend:  https://your-app.vercel.app
+    Backend:   https://your-backend.onrender.com
+    Database:  https://supabase.com/dashboard/project/YOUR_ID
+
+  Post-deploy steps:
+    1. Copy Render URL
+    2. Update VITE_API_URL on Vercel
+    3. Update FRONTEND_URL on Render
+    4. Redeploy both
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  11. KNOWN LIMITATIONS & FUTURE WORK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CURRENT LIMITATIONS:
+    • Free tier: 20 reviews/day
+    • No team/organization support yet
+    • No CI/CD integration
+    • No API key management for external users
+    • Gemini API quota limits may apply
+
+  FUTURE ENHANCEMENTS:
+    • GitHub/GitLab integration (PR reviews)
+    • CI/CD pipeline integration
+    • Team organizations with shared credits
+    • API key management for external access
+    • WebSocket for real-time streaming responses
+    • Code diff view (before/after)
+    • Export reports as PDF
+    • Custom AI persona configuration
+    • Rate limiting per API key
+    • Stripe integration for Pro/Enterprise billing
+    • SSO/SAML for enterprise
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  12. TESTING CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [✓] Sign up with email/password
+  [✓] Sign in after sign up
+  [✓] Session persists on page refresh
+  [✓] Sign out redirects to landing page
+  [✓] Paste code and click Review
+  [✓] AI returns structured analysis
+  [✓] Copy code button works
+  [✓] Chat follow-up works
+  [✓] Ghost mode: review works, nothing saved
+  [✓] Ghost mode ON + credits 0: still works
+  [✓] Ghost mode OFF + credits 0: blocked
+  [✓] Credits reset next day
+  [✓] Credits are per-user (different accounts = separate limits)
+  [✓] Dashboard shows stats + history
+  [✓] Sidebar shows review history
+  [✓] Click review in sidebar loads it in editor
+  [✓] Delete review works
+  [✓] Load sample buggy code
+  [✓] Switch languages
+  [✓] Backend health check endpoint
+  [✓] Backend offline shows helpful error
+  [✓] Landing page buttons route correctly
+  [✓] Mobile responsive
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  13. REFERENCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • React Documentation:        https://react.dev
+  • Tailwind CSS:                https://tailwindcss.com
+  • Framer Motion:               https://www.framer.com/motion
+  • Monaco Editor:               https://microsoft.github.io/monaco-editor
+  • Supabase Docs:               https://supabase.com/docs
+  • Gemini API:                  https://ai.google.dev
+  • Express.js:                  https://expressjs.com
+  • Vite:                        https://vitejs.dev
+  • OWASP Top 10:               https://owasp.org/www-project-top-ten
+  • Lucide Icons:                https://lucide.dev
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  14. CONTACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Name:       Owais Ahmed
+  Roll No:    2467-2024
+  GitHub:     https://github.com/Owais-Ahmed-Siddiqui
+  LinkedIn:   https://www.linkedin.com/in/owais-ahmed-siddiqui
+
+
+════════════════════════════════════════════════════════════════════
+                        END OF REPORT
+════════════════════════════════════════════════════════════════════
